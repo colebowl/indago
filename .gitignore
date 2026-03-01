@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+uploads/
+n8n_data/
+*.log
+.DS_Store
+.turbo
+coverage/
+.pnpm-store/

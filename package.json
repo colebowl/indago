@@ -1,0 +1,20 @@
+{
+  "name": "indago",
+  "private": true,
+  "scripts": {
+    "dev:web": "pnpm --filter @indago/web dev",
+    "dev:api": "pnpm --filter @indago/api dev",
+    "dev": "pnpm run --parallel dev:web dev:api",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
