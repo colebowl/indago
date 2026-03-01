@@ -1,0 +1,316 @@
+---
+description: Indago project context, product scope, and conventions
+globs: "**/*"
+alwaysApply: true
+---
+
+# Indago — Project Context
+
+** This file is to be used as a baseline for scoping out an "MVP"-ish demo as my application for the Wealthsimple AI Builder role. The following is the summary of a brainstorming session on the project.
+
+** For each new tool used (Cursor, n8n, Claud) as well as any change of prompt type (ask, plan, agent etc), update the "Tools Used" section in the readme.md file
+
+## Project Background: 
+
+This is my AI app to apply for this position.
+
+Build something people love
+
+Wealthsimple is on a mission to help everyone achieve financial freedom by reimagining what it means to manage your money. Using smart technology, we take financial services that are often confusing and expensive and make them transparent and low-cost for everyone. We’re the largest fintech company in Canada, with 3+ million users who trust us with more than $100 billion in assets. And we’re just getting started.
+
+We’re looking for someone who thinks big, sweats the small stuff and keeps things simple. You’ll join a high-bar, fast-paced team where people are trusted to own their work, communicate openly, and ship things that improve our clients’ lives. Collaboration, humility, and an obsession over quality are how we get stuff done.
+
+Be a part of our Canadian success story and help shape the financial future of millions. Read our Culture Manual and learn more about how we work.
+
+About Wealthsimple
+Wealthsimple is on a mission to help everyone achieve financial freedom by reimagining what it means to manage your money. Using smart technology, we take financial services that are often confusing, opaque, and expensive and make them transparent and low-cost for everyone. We're the largest fintech company in Canada, with over 3+ million users who trust us with more than $100 billion in assets. Our teams ship often and make an impact with groundbreaking ideas. We're looking for talented people who keep it simple and value collaboration and humility as we continue to create inclusive and high-performing teams where people can be inspired to do their best work.
+
+What This Is
+We're not hiring for a traditional role. We're building a small team of cross-functional builders to rethink how modern AI should change the way work actually gets done — not by layering AI onto old workflows, but by rebuilding business processes from scratch as AI-native systems.
+
+This is not a resume-driven process. Instead of telling us what you've done, we're asking you to build something real.
+
+If selected, you'll join Wealthsimple full-time to work alongside an experienced AI leader and domain experts to ship systems that operate in the real world — ones that handle real cognitive and operational responsibility, at scale.
+
+What You'll Do
+As an AI Builder, you'll own the full path from problem to shipped system to real-world adoption. That means:
+
+Identifying business processes that evolved before modern AI existed and redesigning them from scratch as AI-native workflows
+
+Prototyping quickly, testing assumptions, and iterating based on operational reality
+
+Working across functions, including engineering, regulatory & compliance, and go-to-market — not specializing in just one
+
+Collaborating with domain experts to pressure-test ideas before they go live
+
+Making explicit decisions about where AI should take on responsibility — and where it shouldn't
+
+This isn't a role where you execute someone else's roadmap. You bring the judgment.
+
+Who This Is For
+You might be early in your career. Or not. What matters to us is speed, judgment, and ownership. This is a technical role, but not a narrow one. It’s for builders who think in systems, move comfortably across disciplines, and know how to turn ambiguity into shipped work.
+
+You see yourself as a mix of product thinker, engineer, operator, and strategist, not confined to a single function.
+
+You're a strong fit if you:
+
+Have looked at a legacy system and thought, "This wouldn't exist like this if it were built today"
+
+Prototype quickly and operate end-to-end - from system design to real-world rollout.
+
+Can coordinate complex, cross-functional work without losing momentum.
+
+Have hands-on experience building with AI tools, models, or APIs
+
+Care deeply about whether something would actually work in the real world — not just in a demo
+
+Are energized by change and lean into new technology rather than waiting to be told to
+
+You don't need a background in fintech. You don't need to know how Wealthsimple works internally. We're evaluating how you reason, what assumptions you make explicit, and how you design under real-world constraints.
+
+How to Apply
+Instead of a resume, we're asking you to build something.
+
+Design and prototype an AI system that meaningfully expands what a human can do. This might mean:
+
+Rebuilding a legacy workflow
+
+Handling far more complexity or serving far more people
+
+Making higher-quality decisions
+
+Operating reliably in situations that were previously impractical
+
+Your system must:
+
+Clearly define the human's role
+
+Take on real cognitive or operational responsibility
+
+Explicitly name one critical decision that must remain human — and why
+
+What to submit:
+
+Demo video (2–3 minutes). Show the system actually working.
+
+Short written explanation (max 500 words) covering: what the human can now do that they couldn't before; what AI is responsible for; where AI must stop; and what would break first at scale.
+
+Your salary expectation and years of hands-on experience with AI tools or systems.
+
+No decks. No resumes.
+
+
+Have additional questions, check out this FAQ.
+
+What Happens After You Apply
+Applications close Monday, March 2 at 11:59pm est
+
+All submissions reviewed within 48 hours of close
+
+Select candidates will be invited to a pitch-style interview on March 4. with an executive interview panel where you’ll be asked to present your idea
+
+Recruiter conversations the same week
+
+Offers will be made within a week of your interview loop
+
+All candidates hear back regardless of outcome
+
+Why Wealthsimple?
+
+🌸 Top-tier health benefits and life insurance
+
+📈 Long-term group savings with employer match using our Wealthsimple for Business platform
+
+🌴 20 vacation days + 4 wellness days per year, and unlimited sick and mental health days
+
+✈️ 90 days away program: Employees can work outside of Canada for up to 90 days per calendar year
+
+👥 A wide variety of peer and company-led Employee Resources Groups (e.g., Rainbow, Women of Wealthsimple, Black @ WS)
+
+🌎 We’re a remote first team with over 1,500 employees across North America - and one of the best things about working here is the people. You’ll be collaborating with incredibly talented, curious, and driven teammates who care deeply about doing great work.
+
+Technology & Innovation at Wealthsimple
+
+We believe the future belongs to those who innovate boldly. At Wealthsimple, every team member is expected to lean into new technologies, including AI, and tooling to rethink how we work, solve problems faster, and create even greater value. We're looking for people who are not just comfortable with change but energized by it. Our commitment is to build a company that evolves at the pace of the world around us, and we want you to help lead that future.
+
+DEI Statement
+
+At Wealthsimple, we are building products for a diverse world and we need a diverse team to do that successfully. We strongly encourage applications from everyone regardless of race, religion, colour, national origin, gender, sexual orientation, age, marital status, or disability status.
+
+Accessibility Statement
+
+Wealthsimple provides an accessible candidate experience. If you need any accommodations or adjustments throughout the interview process and beyond, please let us know, and we will work with you to provide the necessary support and make reasonable accommodations to facilitate your participation. We are continuously working to improve our accessibility practices and welcome any feedback or suggestions on how we can better accommodate candidates with accessibility needs.
+
+We may use artificial intelligence (AI) tools to support parts of the hiring process, such as reviewing applications, analyzing resumes, or assessing responses. These tools assist our recruitment team but do not replace human judgment. Final hiring decisions are ultimately made by humans. If you would like more information about how your data is processed, please contact us.
+
+
+## Goal
+
+- To demonstrate that I not only have the ability to use AI tools effectively to solve problems, but also have 20 years of experience building distributed systems at scale and that I'm the right person for the job.
+
+## What Is Indago
+
+Indago is a mobile-first web app that guides Canadian home buyers through property due diligence and neighbourhood research. It knows what to check (based on property attributes), how to check it (programmatic, manual with guidance, or ask someone), and what findings mean (contextualized, sourced insights personalized by buyer type). Canada-wide vision, BC-focused MVP.
+
+## Who It's For
+
+Three core user personas:
+
+- **Purchaser** — Wants to understand the pros and cons of a property, doesn't know all the things to check, wants to make an informed decision they can feel comfortable with.
+- **Realtors** — They often do all this work on behalf of their clients, performing checks, creating reports. Either the buying or selling agent could provide this to potential buyers.
+- **Mortgage Brokers / Banks** — Helping clients identify risks, insurance and liability concerns.
+
+## Core Problem
+
+Residential property due diligence in Canada is fragmented, overwhelming, and easy to skip. Buyers rely on realtors who may not cover everything. There's no single tool that orchestrates the full process, explains why each check matters, or contextualizes what findings mean. The information exists — it's scattered across dozens of government portals, professional inspections, and conversations that a buyer doesn't know to have.
+
+## What the AI Is Responsible For
+
+- Knowing the complete landscape of what to check for a given property
+- Knowing how each piece of information is obtained (programmatic, manual lookup, ask someone)
+- Contextualizing results so a buyer understands what a finding means for their decision
+- Providing sourced citations at every level: data fetched, rules applied, AI judgments made
+- Personalizing insight prioritization based on buyer type
+
+## Where AI Must Stop
+
+The decision to buy, skip a check, or accept a risk stays with the human. The AI does not provide legal or financial advice, does not replace inspectors/realtors/lawyers, and does not handle transactions, payments, or document signing.
+
+## What Breaks First at Scale
+
+Data freshness (government portals change), province-specific rule sets (expanding beyond BC), and liability if guidance is wrong.
+
+## Due Diligence Check Categories (75 checks, 9 categories)
+
+Property attributes (type, age, location, water source, strata vs freehold) drive which checks are activated. The checklist is objective and complete regardless of buyer type.
+
+1. **Ownership & Title** (15 checks) — liens, charges, easements, covenants, strata docs, ALR, mineral rights, subsurface rights
+2. **Physical Structure** (14 checks) — inspection items, systems age, hazmat (asbestos pre-1990, lead pre-1978), permits, well/septic, leaky condo era (1985-2000)
+3. **Land & Natural Hazards** (9 checks) — flood, earthquake, wildfire, radon, landslide, tsunami, climate projections
+4. **Environmental Legacy** (5 checks) — BC Site Registry contaminated sites, historical land use, underground tanks
+5. **Land Use & Zoning** (9 checks) — zoning designation, OCP status & review, permitted uses, heritage, ADU/STR potential, ALR restrictions
+6. **Financial** (10 checks) — BC Assessment value, PTT calculation & exemptions, insurance, comparable sales
+7. **Neighbourhood & Context** (8 checks) — schools, crime, transit, walkability, development plans, connectivity
+8. **Regulatory & Compliance** (7 checks) — PDS, BCFSA disclosure, foreign buyer rules, building code, strata restrictions
+9. **Transaction Risk** (6 checks) — subject clauses, closing costs, title insurance, lawyer engagement
+
+## Three Data Acquisition Modes (Gradient of AI Autonomy)
+
+Each check uses one of three modes, demonstrated by three MVP flows:
+
+### Check Architecture: Definition + Persona + Skill
+
+Each check is a self-contained module with three parts following the single-responsibility principle:
+- **Definition** — metadata: what this check is, why it matters, activation rules, data mode, tier
+- **Persona** — system prompt and expertise framing for the AI agent executing this check
+- **Skill** — execution logic implementing a common `CheckSkill` interface
+
+This enables independent testing, A/B testing of different personas/strategies, clean extensibility (add a check = add a folder with 3 files), and provider-agnostic LLM usage.
+
+### Workflow Orchestration: n8n
+
+n8n (self-hosted, Docker) orchestrates when and in what order checks run. The API exposes check execution endpoints; n8n calls them via webhooks. This separates "how to run a check" (API + check modules) from "when to run checks" (n8n workflow canvas). Production evolution path: evaluate Temporal for durable execution guarantees at scale.
+
+### Flow A: Listing + Zoning + OCP + PTT [Programmatic]
+AI fetches and interprets autonomously. User pastes a realtor.ca URL.
+- Fetches listing, extracts property details (address, type, year built, lot size, price)
+- Identifies municipality, looks up zoning designation and permitted uses
+- Finds and summarizes OCP: when adopted, is it under review, what are the municipality's goals for this area
+- Calculates Property Transfer Tax and checks exemption eligibility
+- Generates sourced insights: ADU potential, STR eligibility, future density changes
+
+### Flow B: Title Search Guidance + Document Parsing [Manual Lookup]
+AI guides the human step-by-step, then processes what they upload.
+- Provides the PID, links to myLTSA.ca, explains how to request "Title Search with History"
+- User downloads and uploads the title PDF
+- AI parses: charges, liens, easements, covenants, legal description
+- AI contextualizes each finding with plain-language explanation and source
+
+### Flow C: Property History Inquiry + Correspondence Tracking [Ask Someone]
+AI determines who to contact, drafts communication, tracks responses.
+- Identifies who to ask (municipality environmental dept, realtor for PDS)
+- Provides contact info for the specific municipality
+- Drafts a customizable email with trackable reference ID in subject line
+- Optional CC to app for response tracking
+
+## Three-Tier MVP Strategy
+
+| Tier | What | Implementation |
+|---|---|---|
+| **Tier 1: Fully Functional** | Zoning + OCP + PTT (Flow A), Title (Flow B), Property History (Flow C) | Real data, real AI processing |
+| **Tier 2: Simulated** | Natural Hazards, Financial (beyond PTT), Strata | Functional UI, realistic mock data |
+| **Tier 3: Listed** | Physical Structure, Neighbourhood, Know Your Neighbours, Regulatory, Transaction | Visible as line items with "why this matters" but not active |
+
+## UX Layers
+
+1. **Intake** — Paste listing URL + 1-3 buyer intent questions (primary goal, first-time buyer status, specific concerns)
+2. **"For You" Summary** — AI-curated top 4-6 insights prioritized by buyer type, with sources
+3. **Full Report** — All checks organized by question-first section headers (e.g., "What am I allowed to do with this property?"), with status per section
+4. **Check Detail** — What this is, why it matters, what the result means, source citations at three levels
+5. **Know Your Neighbours** — Stubbed as future vision (adjacent zoning, proximity to industrial, nearby dev applications)
+
+### Buyer Type Personalization
+
+Buyer type drives how insights are prioritized and framed — not which checks appear.
+
+| Buyer Type | Priority Insights |
+|---|---|
+| First-time buyer, living in it | Safety, costs, neighbourhood, PTT exemption, mortgage offset |
+| Investor / rental | Rental restrictions, strata bylaws, rental income, vacancy tax |
+| Airbnb / short-term rental | Municipal STR bylaws, strata restrictions, licensing, insurance |
+| Renovation / flip | Zoning, permitted uses, heritage designation, building permits, FSR headroom |
+| Family relocation | Schools, commute, parks, safety, daycare proximity |
+| Downsizer | Strata fees, accessibility, maintenance-free, walkability |
+
+### Source Attribution (Every Level)
+
+- **Section answer** — cites all sources that contributed to the synthesized conclusion
+- **Individual check** — shows its specific data source, URL, retrieval timestamp
+- **AI inference** — explicitly states when the AI is interpreting rather than reporting, with "confirm with [authority]" guidance
+
+## Key Screens
+
+1. **Property list** — Cards showing each property, completion %, status, last updated
+2. **Add property** — Paste listing URL, 1-3 buyer intent questions, "Generate report" CTA
+3. **"For You" summary** — Personalized top insights for buyer type with sources
+4. **Property report** — Question-first section headers with evolving AI answers, progress tracking
+5. **Check detail** — Explanation, resource links, questions to ask, cost hints, sources, mark complete / skip
+6. **PTT calculator** — Province-specific transfer tax with exemption checks
+
+## Design Principles
+
+- Mobile-first, works on phone, tablet, and desktop
+- Calm, trustworthy, approachable — not clinical or corporate
+- Checklist feel: checkboxes, progress bars, completion percentages
+- Sections as distinct cards with status and counts
+- Minimal chrome — focus on the checklist and current item
+- Every check answers: What is this? Why does it matter? What does the result mean?
+
+## BC-Specific Content (MVP)
+
+The platform is Canada-wide in vision, but the MVP focuses on British Columbia.
+
+All checklist items, resources, and guidance are specific to BC:
+- Property Transfer Tax and first-time buyer exemptions
+- LTSA (Land Title & Survey Authority)
+- BC Assessment
+- PreparedBC (natural hazards)
+- BCCDC Radon Map
+- Strata: Form B, Form F, depreciation reports
+- GWELLS (well records)
+- BCFSA (disclosure guidance)
+- Provincial flood, earthquake, wildfire, landslide mapping
+- ALR (Agricultural Land Reserve) via ALC
+- BC Site Registry (contaminated sites)
+- Municipal OCP lookup and zoning portals
+- Mineral Titles Online (subsurface rights)
+
+## Conventions
+
+- Use TypeScript strict mode
+- Prefer named exports
+- Components in PascalCase files
+- Use `@/` path alias for imports from src
+- Keep components small and composable
+- Collocate types with the modules that use them
+- No comments that merely narrate what code does

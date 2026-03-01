@@ -1,0 +1,46 @@
+---
+description: UI and component conventions for Indago
+globs: "src/**/*.tsx"
+alwaysApply: false
+---
+
+# UI Conventions
+
+## Component Library
+
+Use shadcn/ui components as the foundation. Import from `@/components/ui/`.
+
+## Styling
+
+- Tailwind CSS utility classes
+- Avoid inline styles
+- Use `cn()` helper (from shadcn) for conditional classes
+- Design tokens via Tailwind config (colors, spacing, fonts)
+
+## Color Palette Direction
+
+- Primary: teal / blue-green (trustworthy, calm)
+- Background: light / near-white
+- Cards: white with subtle border or shadow
+- Status colors: green (complete), amber (in progress), gray (not started), red (flagged/blocked)
+- Text: dark gray, not pure black
+
+## Layout
+
+- Mobile-first responsive
+- Consistent padding and spacing using Tailwind scale
+
+## Checklist UI Patterns
+
+- Checkboxes for items (not toggle switches)
+- Strikethrough or muted style for completed items
+- Progress bars or percentage badges per section
+- Section cards with expand/collapse
+- Status badges: Not started, In progress, Complete, Skipped
+
+## Accessibility
+
+- Semantic HTML (headings, lists, buttons)
+- Keyboard navigable
+- Sufficient color contrast
+- ARIA labels where needed
