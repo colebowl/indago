@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useProperties } from '@/hooks/useProperty'
+import { useProperties, useDeleteProperty } from '@/hooks/useProperty'
 import { PropertyCard } from '@/components/features/PropertyCard'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -7,6 +7,7 @@ import { Plus, Search } from 'lucide-react'
 
 export function PropertyListPage() {
   const { data: properties, isLoading, error } = useProperties()
+  const deleteProperty = useDeleteProperty()
 
   if (isLoading) {
     return (
@@ -66,6 +67,7 @@ export function PropertyListPage() {
           <PropertyCard
             key={property.id}
             property={property}
+            onDelete={(id) => deleteProperty.mutate(id)}
           />
         ))}
       </div>

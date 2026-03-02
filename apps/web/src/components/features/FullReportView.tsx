@@ -43,14 +43,17 @@ function FullCategorySection({ group }: { group: CategoryGroup }) {
                     <p className="text-xs text-muted-foreground">
                       {completedCount}/{group.checks.length} checks
                     </p>
-                    {riskScore && (
+                    {riskScore && riskScore.level !== 'none' && (
                       <RiskScoreBadge score={riskScore.score} level={riskScore.level} />
                     )}
                   </div>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <CheckStatusBadge status={status} />
+                <CheckStatusBadge
+                  status={status}
+                  showSpinner={status === 'in_progress' && group.checks.some(c => c.status === 'in_progress')}
+                />
                 <ChevronDown
                   className={cn(
                     'h-4 w-4 text-muted-foreground transition-transform',

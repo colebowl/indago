@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
-import { db } from '../../providers/db/index.js'
-import { properties } from '../../providers/db/schema.js'
+import { db } from '../../providers/db/index'
+import { properties } from '../../providers/db/schema'
 
 type InsertProperty = typeof properties.$inferInsert
 

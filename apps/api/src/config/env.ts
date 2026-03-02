@@ -3,6 +3,7 @@ import { z } from 'zod'
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   ANTHROPIC_API_KEY: z.string().optional().transform(v => v || undefined),
+  ANTHROPIC_MODEL: z.string().default('claude-haiku-4-5-20251001'), // Haiku ~3x cheaper than Sonnet; supports web search
   PORT: z.coerce.number().default(3001),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),

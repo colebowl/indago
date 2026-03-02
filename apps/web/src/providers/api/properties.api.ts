@@ -32,18 +32,23 @@ export async function getReport(id: string): Promise<ReportSummary> {
   return apiRequest<ReportSummary>(`/v1/properties/${id}/report`)
 }
 
+const API_BASE = import.meta.env.VITE_API_URL ?? ''
+
 export async function uploadDocument(
   propertyId: string,
   file: File,
-): Promise<{ documentId: string }> {
+): Promise<{ id: string; fileName: string; filePath: string }> {
   const formData = new FormData()
   formData.append('file', file)
 
-  const res = await fetch(`/v1/properties/${propertyId}/upload`, {
+  const res = await fetch(`${API_BASE}/v1/properties/${propertyId}/upload`, {
     method: 'POST',
     body: formData,
   })
 
-  if (!res.ok) throw new Error('Upload failed')
+  if (!res.ok) {
+    const text = await res.text().catch(() => 'Upload failed')
+    throw new Error(text || 'Upload failed')
+  }
   return res.json()
 }

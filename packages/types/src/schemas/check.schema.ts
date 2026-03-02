@@ -83,6 +83,7 @@ export const CheckDefinitionSchema = z.object({
   relatedQuestions: z.array(z.string()),
   estimatedCost: z.string().optional(),
   dependsOn: z.array(z.string()).optional(),
+  isSimulated: z.boolean().optional(),
 })
 export type CheckDefinitionSchema = z.infer<typeof CheckDefinitionSchema>
 
@@ -98,6 +99,8 @@ export const CheckResult = z.object({
   guidance: UserGuidance.nullable(),
   insight: BuyerInsight.nullable(),
   tier: z.number().int(),
+  retryCount: z.number().int().default(0),
+  maxRetries: z.number().int().default(3),
   definition: CheckDefinitionSchema.optional(),
   completedAt: z.string().nullable(),
   createdAt: z.string(),

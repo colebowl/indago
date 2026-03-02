@@ -1,4 +1,18 @@
 import type { CheckCategory, CheckResult, RiskLevel, ReportSection } from '@indago/types'
+
+/** True when check failed but will be retried automatically. */
+export function hasRetriesLeft(check: CheckResult): boolean {
+  return (
+    check.status === 'error' &&
+    (check.retryCount ?? 0) < (check.maxRetries ?? 3)
+  )
+}
+
+/** Status for display: error+retries shows as in_progress. */
+export function getEffectiveStatus(check: CheckResult): CheckResult['status'] {
+  if (hasRetriesLeft(check)) return 'in_progress'
+  return check.status
+}
 import {
   Shield,
   Home,
@@ -134,12 +148,13 @@ export function getCategoryRiskScore(checks: CheckResult[]): { score: number; la
 }
 
 export function getCategoryOverallStatus(checks: CheckResult[]): CheckResult['status'] {
-  if (checks.some(c => c.status === 'error')) return 'error'
-  if (checks.every(c => c.status === 'complete')) return 'complete'
-  if (checks.every(c => c.status === 'not_started')) return 'not_started'
-  if (checks.some(c => c.status === 'needs_input')) return 'needs_input'
-  if (checks.some(c => c.status === 'in_progress')) return 'in_progress'
-  if (checks.some(c => c.status === 'awaiting_response')) return 'awaiting_response'
-  if (checks.some(c => c.status === 'complete')) return 'in_progress'
+  const status = (c: CheckResult) => getEffectiveStatus(c)
+  if (checks.some(c => status(c) === 'error')) return 'error'
+  if (checks.every(c => status(c) === 'complete')) return 'complete'
+  if (checks.every(c => status(c) === 'not_started')) return 'not_started'
+  if (checks.some(c => status(c) === 'needs_input')) return 'needs_input'
+  if (checks.some(c => status(c) === 'in_progress')) return 'in_progress'
+  if (checks.some(c => status(c) === 'awaiting_response')) return 'awaiting_response'
+  if (checks.some(c => status(c) === 'complete')) return 'in_progress'
   return 'not_started'
 }

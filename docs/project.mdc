@@ -309,6 +309,7 @@ All checklist items, resources, and guidance are specific to BC:
 
 - Use TypeScript strict mode
 - Prefer named exports
+- **Imports**: Use extensionless paths (e.g. `from './foo'`), never `from './foo.js'`
 - Components in PascalCase files
 - Use `@/` path alias for imports from src
 - Keep components small and composable

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import type { CheckResult } from '@indago/types'
+import { getEffectiveStatus } from '@/lib/categories'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { CheckStatusBadge } from './CheckStatusBadge'
 import { RiskLevelBadge, RiskNotAssessed } from './RiskLevelBadge'
@@ -9,8 +10,14 @@ import { InquiryDrafter } from './InquiryDrafter'
 import { PTTCalculator } from './PTTCalculator'
 import { CheckRunning } from './CheckRunning'
 import { useUIStore } from '@/stores/ui.store'
-import { ChevronRight } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { ChevronRight, FlaskConical } from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+const SIMULATED_CHECK_IDS = ['natural-hazards'] as const
+function isSimulatedCheck(check: CheckResult): boolean {
+  return check.definition?.isSimulated === true || SIMULATED_CHECK_IDS.includes(check.checkId as (typeof SIMULATED_CHECK_IDS)[number])
+}
 
 function getCheckDisplayName(checkId: string): string {
   const names: Record<string, string> = {
@@ -37,7 +44,7 @@ function getCheckDisplayName(checkId: string): string {
 
 function hasExpandableContent(check: CheckResult): boolean {
   if (check.tier === 3) return false
-  if (check.status === 'in_progress') return true
+  if (getEffectiveStatus(check) === 'in_progress') return true
   if (check.summary) return true
   if (check.insight) return true
   if (check.sources && check.sources.length > 0) return true
@@ -105,12 +112,22 @@ export function CheckItem({ check }: { check: CheckResult }) {
             </div>
 
             <div className="flex items-center gap-1.5 shrink-0">
-              {check.riskLevel != null ? (
+              {isSimulatedCheck(check) && check.status !== 'not_started' && (
+                <Badge
+                  variant="outline"
+                  className="text-[10px] font-normal text-muted-foreground border-dashed border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20"
+                  title="This check uses simulated data for demo purposes. Real data will be available in a future release."
+                >
+                  <FlaskConical className="h-2.5 w-2.5 mr-0.5" />
+                  Simulated
+                </Badge>
+              )}
+              {check.riskLevel != null && check.riskLevel !== 'none' ? (
                 <RiskLevelBadge level={check.riskLevel} />
-              ) : check.status !== 'not_started' && !isTier3 ? (
+              ) : check.riskLevel == null && check.status !== 'not_started' && !isTier3 ? (
                 <RiskNotAssessed />
               ) : null}
-              <CheckStatusBadge status={check.status} />
+              <CheckStatusBadge status={getEffectiveStatus(check)} />
             </div>
           </button>
         </CollapsibleTrigger>
@@ -118,16 +135,26 @@ export function CheckItem({ check }: { check: CheckResult }) {
         {expandable && (
           <CollapsibleContent>
             <div className="px-3 pb-3 pt-0 ml-[26px] space-y-2.5 border-t border-border/50">
-              {check.status === 'in_progress' && (
+              {isSimulatedCheck(check) && check.status !== 'in_progress' && (
+                <div className="pt-2.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <FlaskConical className="h-3 w-3 text-amber-500/70 shrink-0" />
+                  <span>Simulated data for demo — real assessment coming in a future release</span>
+                </div>
+              )}
+              {getEffectiveStatus(check) === 'in_progress' && (
                 <CheckRunning checkId={check.checkId} startedAt={check.createdAt} />
               )}
 
-              {check.summary && !isTier3 && check.status !== 'in_progress' && (
+              {check.summary && !isTier3 && getEffectiveStatus(check) !== 'in_progress' && (
                 <p className="text-xs text-muted-foreground pt-2.5">{check.summary}</p>
               )}
 
-              {check.checkId === 'title-search' && check.status === 'needs_input' && check.guidance && (
-                <TitleUpload guidance={check.guidance} propertyId={check.propertyId} />
+              {check.checkId === 'title-search' && (
+                <TitleUpload
+                  guidance={check.guidance ?? undefined}
+                  propertyId={check.propertyId}
+                  titleResult={check.status === 'complete' ? { summary: check.summary, details: check.details } : undefined}
+                />
               )}
 
               {check.checkId === 'property-history' && check.guidance?.emailDraft && (

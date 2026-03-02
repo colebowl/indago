@@ -29,6 +29,10 @@ export function useDeleteProperty() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => deleteProperty(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['properties'] }),
+    onSuccess: (_, id) => {
+      qc.invalidateQueries({ queryKey: ['properties'] })
+      qc.removeQueries({ queryKey: ['property', id] })
+      qc.removeQueries({ queryKey: ['report', id] })
+    },
   })
 }

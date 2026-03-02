@@ -1,11 +1,19 @@
 import { eq, and } from 'drizzle-orm'
-import { db } from '../../providers/db/index.js'
-import { checkResults, inquiries } from '../../providers/db/schema.js'
+import { db } from '../../providers/db/index'
+import { checkResults, inquiries } from '../../providers/db/schema'
+import { DEFAULT_MAX_RETRIES } from '../../providers/db/schema'
 
 type InsertCheckResult = typeof checkResults.$inferInsert
 type InsertInquiry = typeof inquiries.$inferInsert
 
-export async function upsertCheckResult(data: InsertCheckResult) {
+export async function upsertCheckResult(
+  data: Omit<InsertCheckResult, 'retryCount' | 'maxRetries'> & {
+    retryCount?: number
+    maxRetries?: number
+  },
+) {
+  const { retryCount: incomingRetryCount, maxRetries: incomingMaxRetries, ...rest } = data as InsertCheckResult & { retryCount?: number; maxRetries?: number }
+
   const existing = await db
     .select()
     .from(checkResults)
@@ -17,16 +25,32 @@ export async function upsertCheckResult(data: InsertCheckResult) {
     )
     .limit(1)
 
+  let retryCount: number
+  let maxRetries: number
+
+  if (data.status === 'error' && existing[0]) {
+    retryCount = (existing[0].retryCount ?? 0) + 1
+    maxRetries = existing[0].maxRetries ?? DEFAULT_MAX_RETRIES
+  } else if (data.status === 'error') {
+    retryCount = incomingRetryCount ?? 1
+    maxRetries = incomingMaxRetries ?? DEFAULT_MAX_RETRIES
+  } else {
+    retryCount = 0
+    maxRetries = incomingMaxRetries ?? existing[0]?.maxRetries ?? DEFAULT_MAX_RETRIES
+  }
+
+  const payload = { ...rest, retryCount, maxRetries }
+
   if (existing[0]) {
     const rows = await db
       .update(checkResults)
-      .set({ ...data, updatedAt: new Date() })
+      .set({ ...payload, updatedAt: new Date() })
       .where(eq(checkResults.id, existing[0].id))
       .returning()
     return rows[0]!
   }
 
-  const rows = await db.insert(checkResults).values(data).returning()
+  const rows = await db.insert(checkResults).values(payload).returning()
   return rows[0]!
 }
 

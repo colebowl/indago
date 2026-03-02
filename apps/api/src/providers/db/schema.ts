@@ -6,11 +6,13 @@ import {
   boolean,
   timestamp,
   jsonb,
+  primaryKey,
 } from 'drizzle-orm/pg-core'
 
 export const properties = pgTable('properties', {
   id: uuid('id').primaryKey().defaultRandom(),
   listingUrl: text('listing_url'),
+  primaryImagePath: text('primary_image_path'),
   address: text('address').notNull(),
   municipality: text('municipality'),
   province: text('province').notNull().default('BC'),
@@ -32,6 +34,8 @@ export const properties = pgTable('properties', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
+export const DEFAULT_MAX_RETRIES = 3
+
 export const checkResults = pgTable('check_results', {
   id: uuid('id').primaryKey().defaultRandom(),
   propertyId: uuid('property_id')
@@ -46,6 +50,8 @@ export const checkResults = pgTable('check_results', {
   guidance: jsonb('guidance'),
   insight: jsonb('insight'),
   tier: integer('tier').notNull(),
+  retryCount: integer('retry_count').notNull().default(0),
+  maxRetries: integer('max_retries').notNull().default(DEFAULT_MAX_RETRIES),
   completedAt: timestamp('completed_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -68,6 +74,22 @@ export const inquiries = pgTable('inquiries', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
+
+export const reportSectionAnswers = pgTable(
+  'report_section_answers',
+  {
+    propertyId: uuid('property_id')
+      .notNull()
+      .references(() => properties.id, { onDelete: 'cascade' }),
+    questionId: text('question_id').notNull(),
+    aiAnswer: text('ai_answer').notNull(),
+    synthesizedAt: timestamp('synthesized_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.propertyId, t.questionId] }),
+  }),
+)
 
 export const uploadedDocuments = pgTable('uploaded_documents', {
   id: uuid('id').primaryKey().defaultRandom(),

@@ -1,14 +1,14 @@
-import { env } from '../config/env.js'
+import { env } from '../config/env'
 import {
   findAllProperties,
   findPropertyById,
   findPropertyWithChecks,
-} from '../db/queries/property.queries.js'
+} from '../db/queries/property.queries'
 import {
   insertProperty,
   updateProperty,
   deleteProperty,
-} from '../db/mutations/property.mutations.js'
+} from '../db/mutations/property.mutations'
 
 interface CreatePropertyInput {
   listingUrl: string
@@ -47,29 +47,65 @@ export async function removeProperty(id: string) {
 
 export { updateProperty }
 
+/** Notifies n8n to trigger checks. Checks run ONLY via n8n -> POST /checks/{checkId}/execute. */
 async function triggerChecks(propertyId: string) {
-  if (env.N8N_WEBHOOK_URL) {
-    try {
-      const res = await fetch(env.N8N_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ propertyId }),
-      })
-      if (res.ok) return
-      console.warn('n8n webhook returned non-OK, falling back to in-process')
-    } catch {
-      console.warn('n8n webhook unreachable, falling back to in-process')
-    }
+  const property = await findPropertyById(propertyId)
+  if (!property) return
+
+  if (!env.N8N_WEBHOOK_URL) {
+    console.warn('N8N_WEBHOOK_URL not set — checks will not run. Configure n8n to trigger /checks/{checkId}/execute.')
+    return
   }
 
-  // In-process fallback — will be implemented with check executor in Task 17+
-  console.info(`In-process check execution for property ${propertyId} (not yet implemented)`)
+  try {
+    const payload = {
+      propertyId,
+      listingUrl: property.listingUrl,
+      address: property.address,
+      buyerType: property.buyerType,
+      isFirstTimeBuyer: property.isFirstTimeBuyer,
+    }
+    const res = await fetch(env.N8N_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    if (!res.ok) {
+      console.warn('n8n webhook returned non-OK:', res.status, await res.text().catch(() => ''))
+    }
+  } catch (err) {
+    console.error('n8n webhook unreachable:', err)
+  }
 }
 
+/** Triggers checks via n8n only. Checks run ONLY via POST /checks/{checkId}/execute. */
 export async function runAllChecks(propertyId: string) {
   const property = await findPropertyById(propertyId)
   if (!property) return null
 
-  await triggerChecks(propertyId)
+  if (!env.N8N_WEBHOOK_URL) {
+    throw new Error(
+      'N8N_WEBHOOK_URL not set. Checks must be triggered by n8n calling POST /checks/{checkId}/execute.',
+    )
+  }
+
+  const payload = {
+    propertyId,
+    listingUrl: property.listingUrl,
+    address: property.address,
+    buyerType: property.buyerType,
+    isFirstTimeBuyer: property.isFirstTimeBuyer,
+  }
+  const res = await fetch(env.N8N_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(`n8n webhook failed (${res.status}): ${text || res.statusText}`)
+  }
+
   return { propertyId, triggered: true }
 }

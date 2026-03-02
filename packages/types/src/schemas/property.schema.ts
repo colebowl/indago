@@ -51,6 +51,7 @@ export type CreatePropertyInput = z.infer<typeof CreatePropertyInput>
 export const Property = z.object({
   id: z.string().uuid(),
   listingUrl: z.string().url().nullable(),
+  primaryImagePath: z.string().nullable().optional(),
   address: z.string(),
   municipality: z.string().nullable(),
   province: Province,

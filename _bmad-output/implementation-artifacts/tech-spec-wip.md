@@ -701,21 +701,21 @@ Captured from multi-agent review of the tech spec:
   - File: `apps/api/src/db/queries/check.queries.ts` — findByPropertyId, findByCheckId, findInquiriesByPropertyId
   - File: `apps/api/src/db/mutations/check.mutations.ts` — upsertResult, updateStatus, insertInquiry, updateInquiry
 
-- [ ] Task 20: Implement PTT calculation check
+- [x] Task 20: Implement PTT calculation check
   - File: `apps/api/src/checks/ptt-calculation/definition.ts` — CheckDefinition: id "ptt-calculation", category "financial", tier 1, dataMode "programmatic", activationRules: always active, relatedQuestions: ["Am I going to get hit with surprise costs?"]
   - File: `apps/api/src/checks/ptt-calculation/persona.ts` — "BC Tax Specialist" persona with system prompt explaining PTT rules, exemptions, and citation requirements
   - File: `apps/api/src/checks/ptt-calculation/skill.ts` — Pure math calculation: 1% on first $200K, 2% on $200K-$2M, 3% on $2M+. First-time buyer exemption (full under $500K, partial $500K-$525K). Newly built exemption (full under $750K, partial $750K-$800K). Foreign buyer 20% surcharge in specified areas. Returns CheckResult with breakdown, exemption eligibility, and Source entries citing BC Property Transfer Tax Act.
   - File: `apps/api/src/checks/ptt-calculation/index.ts` — re-exports definition, persona, skill as CheckModule
   - File: `apps/api/src/checks/ptt-calculation/skill.test.ts` — unit tests for PTT calculation with edge cases (under $200K, exactly $500K, $525K partial, $2M+, foreign buyer)
 
-- [ ] Task 21: Implement listing intake check
+- [x] Task 21: Implement listing intake check
   - File: `apps/api/src/checks/listing-intake/definition.ts` — id "listing-intake", tier 1, dataMode "programmatic", always active
   - File: `apps/api/src/checks/listing-intake/persona.ts` — "Real Estate Listing Analyst" persona. System prompt instructs Claude to use web search to find the listing at the provided URL, extract structured data (address, municipality, property type, year built, lot size, price, PID, bedrooms, bathrooms, water source, sewer type, strata status), and return as JSON.
   - File: `apps/api/src/checks/listing-intake/skill.ts` — calls llm.chatWithWebSearch() with listing URL. Parses structured response. Updates property record in DB with extracted attributes. Returns CheckResult with summary of extracted data and sources.
   - File: `apps/api/src/checks/listing-intake/index.ts`
   - Notes: This check populates property attributes that other checks depend on. Must run first. Define the structured JSON response as a Zod schema in the skill.
 
-- [ ] Task 22: Implement zoning + OCP checks
+- [x] Task 22: Implement zoning + OCP checks
   - File: `apps/api/src/checks/zoning-designation/definition.ts` — id "zoning-designation", category "land-use-zoning", tier 1, dataMode "programmatic", dependsOn: ["listing-intake"], relatedQuestions: ["What am I allowed to do with this property?", "Can I rent this out or Airbnb it?"]
   - File: `apps/api/src/checks/zoning-designation/persona.ts` — "Municipal Zoning Analyst" persona. System prompt: expert in BC municipal zoning bylaws, must identify the municipality's zoning portal, find the designation, extract permitted uses, ADU/secondary suite eligibility, short-term rental rules. Must cite bylaw section numbers.
   - File: `apps/api/src/checks/zoning-designation/skill.ts` — calls llm.chatWithWebSearch() with address + municipality. Returns CheckResult with structured zoning data and sources.
@@ -725,7 +725,7 @@ Captured from multi-agent review of the tech spec:
   - File: `apps/api/src/checks/ocp-status/skill.ts` — calls llm.chatWithWebSearch() for OCP info. Returns adoption date, review status, area designation, planning goals.
   - File: `apps/api/src/checks/ocp-status/index.ts`
 
-- [ ] Task 23: Implement title search + property history checks
+- [x] Task 23: Implement title search + property history checks
   - File: `apps/api/src/checks/title-search/definition.ts` — id "title-search", category "ownership-title", tier 1, dataMode "manual", relatedQuestions: ["Do I actually own what I think I'm buying?"]
   - File: `apps/api/src/checks/title-search/persona.ts` — "Title Examiner" persona.
   - File: `apps/api/src/checks/title-search/skill.ts` — Two modes: (1) No document: returns `needs_input` with UserGuidance (myLTSA.ca steps, PID, cost). (2) Document uploaded: calls llm.parseDocument() with title PDF, extracts charges/liens/easements with plain-language explanations.
@@ -735,7 +735,7 @@ Captured from multi-agent review of the tech spec:
   - File: `apps/api/src/checks/property-history/skill.ts` — calls llm.chatWithWebSearch() for municipality contact info. Generates EmailDraft with trackable reference ID. Checks BC Site Registry. Returns `needs_input` with guidance and draft email.
   - File: `apps/api/src/checks/property-history/index.ts`
 
-- [ ] Task 24: Implement simulated + Tier 3 checks
+- [x] Task 24: Implement simulated + Tier 3 checks
   - File: `apps/api/src/checks/natural-hazards/definition.ts` — id "natural-hazards", category "land-natural-hazards", tier 2
   - File: `apps/api/src/checks/natural-hazards/persona.ts` — "Natural Hazard Assessor" persona
   - File: `apps/api/src/checks/natural-hazards/skill.ts` — returns realistic mock data: earthquake zone, flood risk, wildfire, radon, with mock sources (NRCan, PreparedBC, BCCDC)
@@ -746,11 +746,11 @@ Captured from multi-agent review of the tech spec:
 
 ### Phase 6: Report Service + Wire Frontend to API (Tasks 25-26)
 
-- [ ] Task 25: Implement report service
+- [x] Task 25: Implement report service
   - File: `apps/api/src/services/report.service.ts` — generateReport: takes property ID, loads all check results, groups by BuyerQuestion, synthesizes section answers from completed checks, calculates overall completion %, generates "For You" summary (top 4-6 insights based on buyer type), returns structured report with sections, sources at all levels.
   - File: `apps/api/src/routes/v1/properties/handlers.ts` — add getReport handler, add getPTT handler, add uploadDocument handler (multipart, saves to disk, triggers title-search re-execution), add createInquiry and updateInquiry handlers
 
-- [ ] Task 26: Swap mock data for real API calls in frontend
+- [x] Task 26: Swap mock data for real API calls in frontend
   - File: `apps/web/src/providers/api/properties.api.ts` — replace mock implementations with real fetch calls to API
   - File: `apps/web/src/providers/api/checks.api.ts` — replace mock implementations with real fetch calls
   - Action: Test end-to-end with real API: create property → checks run → report renders
@@ -758,7 +758,7 @@ Captured from multi-agent review of the tech spec:
 
 ### Phase 7: n8n Orchestration (Tasks 27-28)
 
-- [ ] Task 27: Wire n8n orchestration
+- [x] Task 27: Wire n8n orchestration
   - File: `apps/api/src/services/property.service.ts` — in createProperty, after DB insert, POST to N8N_WEBHOOK_URL with property ID and data. If n8n POST fails, fall back to calling checks sequentially via executor.
   - File: `apps/api/src/routes/v1/properties/handlers.ts` — runAllChecks handler: same logic (try n8n webhook, fall back to in-process)
   - Notes: n8n webhook URL configured via env var. The API doesn't need to know what n8n does internally — it just fires the webhook.

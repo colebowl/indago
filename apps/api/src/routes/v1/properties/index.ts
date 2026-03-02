@@ -3,6 +3,7 @@ import {
   handleCreateProperty,
   handleListProperties,
   handleGetProperty,
+  handleGetPropertyImage,
   handleDeleteProperty,
   handleRunAllChecks,
   handleCreateInquiry,
@@ -10,11 +11,12 @@ import {
   handleGetReport,
   handleGetPTT,
   handleUploadDocument,
-} from './handlers.js'
+} from './handlers'
 
 export async function propertyRoutes(app: FastifyInstance) {
   app.post('/', handleCreateProperty)
   app.get('/', handleListProperties)
+  app.get('/:id/image', handleGetPropertyImage)
   app.get('/:id', handleGetProperty)
   app.delete('/:id', handleDeleteProperty)
 

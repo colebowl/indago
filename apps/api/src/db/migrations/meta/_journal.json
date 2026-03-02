@@ -8,6 +8,27 @@
       "when": 1772409841338,
       "tag": "0000_low_obadiah_stane",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1772487004234,
+      "tag": "0001_cynical_giant_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772490278913,
+      "tag": "0002_oval_shinko_yamashiro",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1772560000000,
+      "tag": "0003_check_retries",
+      "breakpoints": true
     }
   ]
 }

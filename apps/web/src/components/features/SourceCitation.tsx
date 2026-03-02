@@ -1,5 +1,8 @@
+import { useState } from 'react'
 import type { Source } from '@indago/types'
-import { ExternalLink, Database, BookOpen, Brain } from 'lucide-react'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { ExternalLink, Database, BookOpen, Brain, ChevronRight } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const TYPE_CONFIG = {
   data: { label: 'Data', icon: Database, color: 'text-blue-600' },
@@ -41,12 +44,20 @@ export function SourceCitation({ source }: { source: Source }) {
 
 export function SourceList({ sources }: { sources: Source[] }) {
   if (!sources.length) return null
+  const [open, setOpen] = useState(false)
   return (
-    <div className="mt-3 pt-3 border-t space-y-1.5">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Sources</span>
-      {sources.map((s, i) => (
-        <SourceCitation key={i} source={s} />
-      ))}
-    </div>
+    <Collapsible open={open} onOpenChange={setOpen} className="mt-3 pt-3 border-t">
+      <CollapsibleTrigger className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors w-full text-left">
+        <ChevronRight className={cn('h-3 w-3 shrink-0 transition-transform', open && 'rotate-90')} />
+        Sources ({sources.length})
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="mt-2 space-y-1.5 pl-4">
+          {sources.map((s, i) => (
+            <SourceCitation key={i} source={s} />
+          ))}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }

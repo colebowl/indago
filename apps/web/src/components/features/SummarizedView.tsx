@@ -43,14 +43,17 @@ function CategorySection({ group }: { group: CategoryGroup }) {
                     <p className="text-xs text-muted-foreground">
                       {completedCount} of {group.checks.length} checks complete
                     </p>
-                    {riskScore && (
+                    {riskScore && riskScore.level !== 'none' && (
                       <RiskScoreBadge score={riskScore.score} level={riskScore.level} />
                     )}
                   </div>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <CheckStatusBadge status={status} />
+                <CheckStatusBadge
+                  status={status}
+                  showSpinner={status === 'in_progress' && group.checks.some(c => c.status === 'in_progress')}
+                />
                 <ChevronDown
                   className={cn(
                     'h-4 w-4 text-muted-foreground transition-transform',
@@ -64,23 +67,23 @@ function CategorySection({ group }: { group: CategoryGroup }) {
 
         <CollapsibleContent>
           <CardContent className="pt-0 px-4 pb-4">
-            {group.questions.length > 0 && (
+            {group.questions.some(q => q.answer) && (
               <div className="mb-4">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                   Key Questions
                 </p>
                 <div className="space-y-2.5">
-                  {group.questions.map((q, i) => (
-                    <div key={i} className="pl-3 border-l-2 border-primary/30">
-                      <p className="text-xs font-semibold flex items-center gap-1.5">
-                        <MessageCircleQuestion className="h-3 w-3 text-primary shrink-0" />
-                        {q.question}
-                      </p>
-                      {q.answer && (
+                  {group.questions
+                    .filter(q => q.answer)
+                    .map((q, i) => (
+                      <div key={i} className="pl-3 border-l-2 border-primary/30">
+                        <p className="text-xs font-semibold flex items-center gap-1.5">
+                          <MessageCircleQuestion className="h-3 w-3 text-primary shrink-0" />
+                          {q.question}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-0.5 ml-[18px]">{q.answer}</p>
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    ))}
                 </div>
               </div>
             )}

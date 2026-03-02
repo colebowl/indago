@@ -1,20 +1,31 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
+import { createReadStream, existsSync } from 'node:fs'
+import { mkdir } from 'node:fs/promises'
+import { createWriteStream } from 'node:fs'
+import { pipeline } from 'node:stream/promises'
+import { join } from 'node:path'
+import { randomUUID } from 'node:crypto'
 import {
   createProperty,
   getProperty,
   listProperties,
   removeProperty,
   runAllChecks,
-} from '../../../services/property.service.js'
-import { insertInquiry, updateInquiry } from '../../../db/mutations/check.mutations.js'
-import { findInquiriesByPropertyId } from '../../../db/queries/check.queries.js'
+} from '../../../services/property.service'
+import {
+  generateReport,
+  getPTT,
+} from '../../../services/report.service'
+import { insertInquiry, updateInquiry } from '../../../db/mutations/check.mutations'
+import { findPropertyById } from '../../../db/queries/property.queries'
+import { insertUploadedDocument } from '../../../db/mutations/document.mutations'
 import {
   CreatePropertyBody,
   PropertyIdParams,
   InquiryIdParams,
   CreateInquiryBody,
   UpdateInquiryBody,
-} from './schema.js'
+} from './schema'
 
 export async function handleCreateProperty(
   request: FastifyRequest,
@@ -45,6 +56,33 @@ export async function handleGetProperty(
   }
 
   return reply.send(property)
+}
+
+export async function handleGetPropertyImage(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const { id } = PropertyIdParams.parse(request.params)
+  const property = await findPropertyById(id)
+
+  if (!property?.primaryImagePath) {
+    return reply.status(404).send({ error: 'Property image not found' })
+  }
+
+  const absolutePath = property.primaryImagePath.startsWith('/')
+    ? property.primaryImagePath
+    : join(process.cwd(), property.primaryImagePath)
+
+  if (!existsSync(absolutePath)) {
+    return reply.status(404).send({ error: 'Image file not found' })
+  }
+
+  const ext = absolutePath.split('.').pop()?.toLowerCase()
+  const contentType = ext === 'png' ? 'image/png' : 'image/jpeg'
+  return reply
+    .header('Content-Type', contentType)
+    .header('Cache-Control', 'public, max-age=86400')
+    .send(createReadStream(absolutePath))
 }
 
 export async function handleDeleteProperty(
@@ -117,11 +155,13 @@ export async function handleGetReport(
   reply: FastifyReply,
 ) {
   const { id } = PropertyIdParams.parse(request.params)
-  // Report service will be implemented in Task 25
-  return reply.send({
-    propertyId: id,
-    message: 'Report generation not yet implemented',
-  })
+  const report = await generateReport(id)
+
+  if (!report) {
+    return reply.status(404).send({ error: 'Property not found' })
+  }
+
+  return reply.send(report)
 }
 
 export async function handleGetPTT(
@@ -129,11 +169,13 @@ export async function handleGetPTT(
   reply: FastifyReply,
 ) {
   const { id } = PropertyIdParams.parse(request.params)
-  // PTT calculation will be implemented in Task 20
-  return reply.send({
-    propertyId: id,
-    message: 'PTT calculation not yet implemented',
-  })
+  const result = await getPTT(id)
+
+  if (!result) {
+    return reply.status(404).send({ error: 'Property not found' })
+  }
+
+  return reply.send(result)
 }
 
 export async function handleUploadDocument(
@@ -141,9 +183,35 @@ export async function handleUploadDocument(
   reply: FastifyReply,
 ) {
   const { id } = PropertyIdParams.parse(request.params)
-  // Document upload will be implemented in Task 23
-  return reply.send({
+
+  const property = await findPropertyById(id)
+  if (!property) {
+    return reply.status(404).send({ error: 'Property not found' })
+  }
+
+  const data = await request.file()
+  if (!data) {
+    return reply.status(400).send({
+      error: 'No file uploaded',
+      message: 'Send a multipart form with a file field',
+    })
+  }
+
+  const ext = data.filename.split('.').pop()?.toLowerCase() || 'pdf'
+  const storedName = `${randomUUID()}.${ext}`
+  const uploadDir = join(process.cwd(), 'uploads', id)
+  const filePath = join(uploadDir, storedName)
+  const relativePath = join('uploads', id, storedName)
+
+  await mkdir(uploadDir, { recursive: true })
+  await pipeline(data.file, createWriteStream(filePath))
+
+  const doc = await insertUploadedDocument({
     propertyId: id,
-    message: 'Document upload not yet implemented',
+    fileName: data.filename,
+    fileType: data.mimetype,
+    filePath: relativePath,
   })
+
+  return reply.status(201).send(doc)
 }

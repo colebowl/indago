@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import type { UserGuidance } from '@indago/types'
+import { uploadDocument, executeCheck } from '@/providers/api'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -17,9 +19,15 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+interface TitleResult {
+  summary?: string | null
+  details?: Record<string, unknown> | null
+}
+
 interface TitleUploadProps {
-  guidance: UserGuidance
+  guidance?: UserGuidance
   propertyId: string
+  titleResult?: TitleResult
 }
 
 type UploadPhase = 'waiting' | 'uploading' | 'analyzing' | 'complete'
@@ -30,35 +38,35 @@ const MOCK_TITLE_RESULTS = {
   titleNumber: 'CA1234567',
   registeredDate: 'March 15, 2018',
   legalDescription: 'LOT 12, BLOCK 5, PLAN 12345, DISTRICT LOT 526, GROUP 1, NWD',
+  aiSummary: 'Title is clean with no concerning liens or encumbrances. Standard mortgage registered to RBC.',
   charges: [
-    {
-      type: 'Mortgage',
-      holder: 'Royal Bank of Canada',
-      registeredDate: 'March 15, 2018',
-      number: 'CA7891011',
-      risk: 'none' as const,
-    },
-    {
-      type: 'Covenant',
-      holder: 'City of Vancouver',
-      registeredDate: 'June 3, 1995',
-      number: 'BB1234567',
-      risk: 'low' as const,
-      note: 'Restricts subdivision — standard for this lot size',
-    },
+    { type: 'Mortgage', holder: 'Royal Bank of Canada', risk: 'none' as const, note: undefined, meta: 'Reg: March 15, 2018 · CA7891011' },
+    { type: 'Covenant', holder: 'City of Vancouver', risk: 'low' as const, note: 'Restricts subdivision — standard for this lot size', meta: 'Reg: June 3, 1995 · BB1234567' },
   ],
   easements: [
-    {
-      type: 'Statutory Right of Way',
-      holder: 'BC Hydro',
-      registeredDate: 'January 12, 1960',
-      note: 'Utility easement along rear property line (1.5m)',
-      risk: 'none' as const,
-    },
+    { type: 'Statutory Right of Way', holder: 'BC Hydro', note: 'Utility easement along rear property line (1.5m)', risk: 'none' as const },
   ],
   liens: [] as { type: string; holder: string; amount: string; risk: 'high' | 'very_high' }[],
-  aiSummary:
-    'Title is clean with no concerning liens or encumbrances. Standard mortgage registered to RBC. One covenant restricting subdivision (common for RS-1 lots). Utility easement along the rear is typical and should not impact your plans.',
+}
+
+function mapApiDetailsToDisplay(details: Record<string, unknown>) {
+  const charges = (details.charges as Array<{ type: string; description: string; implication?: string }>) ?? []
+  const liens = (details.liens as Array<{ party: string; amount: string | null; notes: string }>) ?? []
+  const easements = (details.easements as Array<{ type: string; benefits: string; burdens: string; notes: string }>) ?? []
+  const covenants = (details.covenants as Array<{ description: string; implication: string }>) ?? []
+  const allCharges = [
+    ...charges.map((c) => ({ type: c.type, holder: c.description, note: c.implication, risk: 'none' as const, meta: '' })),
+    ...covenants.map((c) => ({ type: 'Covenant', holder: c.description, note: c.implication, risk: 'low' as const, meta: '' })),
+  ]
+  return {
+    aiSummary: (details.summary as string) ?? 'Title analysis complete.',
+    owner: undefined as string | undefined,
+    titleNumber: undefined as string | undefined,
+    registeredDate: undefined as string | undefined,
+    charges: allCharges,
+    liens: liens.map((l) => ({ type: 'Lien', holder: l.party, amount: l.amount ?? '—', risk: 'high' as const })),
+    easements: easements.map((e) => ({ type: e.type, holder: e.benefits, note: e.notes, risk: 'none' as const })),
+  }
 }
 
 const RISK_STYLES = {
@@ -68,17 +76,27 @@ const RISK_STYLES = {
   very_high: 'bg-red-50 text-red-700 border-red-200',
 }
 
-export function TitleUpload({ guidance, propertyId }: TitleUploadProps) {
+export function TitleUpload({ guidance, propertyId, titleResult }: TitleUploadProps) {
   const [phase, setPhase] = useState<UploadPhase>('waiting')
   const [dragOver, setDragOver] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const handleFile = useCallback(async (_file: File) => {
+  const handleFile = useCallback(async (file: File) => {
+    setUploadError(null)
     setPhase('uploading')
-    await new Promise(r => setTimeout(r, 1500))
-    setPhase('analyzing')
-    await new Promise(r => setTimeout(r, 2500))
-    setPhase('complete')
-  }, [propertyId])
+    try {
+      await uploadDocument(propertyId, file)
+      setPhase('analyzing')
+      await executeCheck(propertyId, 'title-search')
+      await queryClient.invalidateQueries({ queryKey: ['report', propertyId] })
+      await queryClient.invalidateQueries({ queryKey: ['property', propertyId] })
+      setPhase('complete')
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed')
+      setPhase('waiting')
+    }
+  }, [propertyId, queryClient])
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -90,8 +108,14 @@ export function TitleUpload({ guidance, propertyId }: TitleUploadProps) {
     [handleFile],
   )
 
-  if (phase === 'complete') {
-    const r = MOCK_TITLE_RESULTS
+  const showAnalysis = phase === 'complete' || titleResult
+  const r = titleResult?.details
+    ? mapApiDetailsToDisplay(titleResult.details)
+    : phase === 'complete'
+      ? MOCK_TITLE_RESULTS
+      : null
+
+  if (showAnalysis && r) {
     return (
       <div className="mt-3 space-y-3">
         <Card className="p-3 bg-green-50/50 border-green-200">
@@ -100,7 +124,7 @@ export function TitleUpload({ guidance, propertyId }: TitleUploadProps) {
             <span className="text-sm font-medium">Title analysis complete</span>
           </div>
           <p className="text-xs text-muted-foreground mt-1 ml-6">
-            Uploaded title_search_015-234-567.pdf &middot; Analyzed by AI
+            {titleResult ? 'Analyzed by AI' : 'Uploaded document · Analyzed by AI'}
           </p>
         </Card>
 
@@ -112,21 +136,23 @@ export function TitleUpload({ guidance, propertyId }: TitleUploadProps) {
           <p className="text-xs text-muted-foreground">{r.aiSummary}</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="p-2.5 rounded-lg border bg-card space-y-1">
-            <p className="text-muted-foreground flex items-center gap-1">
-              <User className="h-3 w-3" /> Owner
-            </p>
-            <p className="font-medium text-[11px] leading-tight">{r.owner}</p>
+        {r.owner != null && (
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="p-2.5 rounded-lg border bg-card space-y-1">
+              <p className="text-muted-foreground flex items-center gap-1">
+                <User className="h-3 w-3" /> Owner
+              </p>
+              <p className="font-medium text-[11px] leading-tight">{r.owner}</p>
+            </div>
+            <div className="p-2.5 rounded-lg border bg-card space-y-1">
+              <p className="text-muted-foreground flex items-center gap-1">
+                <FileText className="h-3 w-3" /> Title #
+              </p>
+              <p className="font-medium">{r.titleNumber}</p>
+              <p className="text-muted-foreground text-[10px]">{r.registeredDate}</p>
+            </div>
           </div>
-          <div className="p-2.5 rounded-lg border bg-card space-y-1">
-            <p className="text-muted-foreground flex items-center gap-1">
-              <FileText className="h-3 w-3" /> Title #
-            </p>
-            <p className="font-medium">{r.titleNumber}</p>
-            <p className="text-muted-foreground text-[10px]">{r.registeredDate}</p>
-          </div>
-        </div>
+        )}
 
         {r.charges.length > 0 && (
           <div>
@@ -143,7 +169,7 @@ export function TitleUpload({ guidance, propertyId }: TitleUploadProps) {
                   </div>
                   <p className="text-[11px] mt-0.5">{charge.holder}</p>
                   {charge.note && <p className="text-[11px] mt-0.5 italic">{charge.note}</p>}
-                  <p className="text-[10px] opacity-70 mt-0.5">Reg: {charge.registeredDate} &middot; {charge.number}</p>
+                  {charge.meta && <p className="text-[10px] opacity-70 mt-0.5">{charge.meta}</p>}
                 </div>
               ))}
             </div>
@@ -197,10 +223,16 @@ export function TitleUpload({ guidance, propertyId }: TitleUploadProps) {
 
   return (
     <div className="mt-3 space-y-3">
-      <div className="space-y-2">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">How to get the title</p>
-        <ol className="space-y-1.5">
-          {guidance.steps.map((step, i) => (
+      {uploadError && (
+        <div className="p-2.5 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive text-xs">
+          {uploadError}
+        </div>
+      )}
+      {guidance && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">How to get the title</p>
+          <ol className="space-y-1.5">
+            {guidance.steps.map((step, i) => (
             <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
               <span className="font-semibold text-primary shrink-0 w-4 text-right">{i + 1}.</span>
               <span>{step}</span>
@@ -217,7 +249,8 @@ export function TitleUpload({ guidance, propertyId }: TitleUploadProps) {
             Open myLTSA.ca <ExternalLink className="h-3 w-3" />
           </a>
         )}
-      </div>
+        </div>
+      )}
 
       {phase === 'analyzing' ? (
         <Card className="p-4 border-primary/30 bg-accent/30">

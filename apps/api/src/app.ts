@@ -1,9 +1,13 @@
 import Fastify from 'fastify'
 import { ZodError } from 'zod'
-import { env } from './config/env.js'
-import { registerCors } from './plugins/cors.js'
-import { registerMultipart } from './plugins/multipart.js'
-import { propertyRoutes } from './routes/v1/properties/index.js'
+import { env } from './config/env'
+import { registerCors } from './plugins/cors'
+import { registerMultipart } from './plugins/multipart'
+import { registerAllChecks } from './checks/register'
+import { propertyRoutes } from './routes/v1/properties/index'
+import { checkRoutes } from './routes/v1/checks/index'
+
+registerAllChecks()
 
 export async function buildApp() {
   const app = Fastify({
@@ -14,6 +18,19 @@ export async function buildApp() {
           ? { target: 'pino-pretty', options: { colorize: true } }
           : undefined,
     },
+  })
+
+  // Allow empty body when Content-Type is application/json (e.g. n8n POST with no body)
+  app.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {
+    if (body === '' || body === undefined) {
+      return done(null, {})
+    }
+    try {
+      const json = JSON.parse(body as string)
+      done(null, json)
+    } catch (err) {
+      done(err as Error, undefined)
+    }
   })
 
   app.setErrorHandler((error, _request, reply) => {
@@ -37,6 +54,7 @@ export async function buildApp() {
   }))
 
   await app.register(propertyRoutes, { prefix: '/v1/properties' })
+  await app.register(checkRoutes, { prefix: '/v1/properties' })
 
   return app
 }

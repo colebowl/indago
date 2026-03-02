@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
-import { db } from '../../providers/db/index.js'
-import { properties, checkResults } from '../../providers/db/schema.js'
+import { db } from '../../providers/db/index'
+import { properties, checkResults } from '../../providers/db/schema'
 
 export async function findAllProperties() {
   return db.select().from(properties).orderBy(properties.createdAt)

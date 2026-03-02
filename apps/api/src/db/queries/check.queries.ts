@@ -1,6 +1,6 @@
 import { eq, and } from 'drizzle-orm'
-import { db } from '../../providers/db/index.js'
-import { checkResults, inquiries } from '../../providers/db/schema.js'
+import { db } from '../../providers/db/index'
+import { checkResults, inquiries } from '../../providers/db/schema'
 
 export async function findChecksByPropertyId(propertyId: string) {
   return db

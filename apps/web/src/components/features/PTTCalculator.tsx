@@ -26,7 +26,7 @@ export function PTTCalculator({ details }: PTTCalculatorProps) {
     note?: string
   } | undefined
 
-  if (!basePTT) return null
+  if (!basePTT || typeof basePTT === 'number') return null
 
   return (
     <Card className="mt-3 p-4 bg-muted/30">
@@ -45,15 +45,19 @@ export function PTTCalculator({ details }: PTTCalculatorProps) {
 
         <Separator />
 
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">{basePTT.firstBracket.range}</span>
-          <span>{basePTT.firstBracket.rate} = {formatCurrency(basePTT.firstBracket.amount)}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">{basePTT.secondBracket.range}</span>
-          <span>{basePTT.secondBracket.rate} = {formatCurrency(basePTT.secondBracket.amount)}</span>
-        </div>
-        {basePTT.thirdBracket.amount > 0 && (
+        {basePTT.firstBracket && (
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">{basePTT.firstBracket.range}</span>
+            <span>{basePTT.firstBracket.rate} = {formatCurrency(basePTT.firstBracket.amount)}</span>
+          </div>
+        )}
+        {basePTT.secondBracket && (
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">{basePTT.secondBracket.range}</span>
+            <span>{basePTT.secondBracket.rate} = {formatCurrency(basePTT.secondBracket.amount)}</span>
+          </div>
+        )}
+        {basePTT.thirdBracket && basePTT.thirdBracket.amount > 0 && (
           <div className="flex justify-between">
             <span className="text-muted-foreground">{basePTT.thirdBracket.range}</span>
             <span>{basePTT.thirdBracket.rate} = {formatCurrency(basePTT.thirdBracket.amount)}</span>

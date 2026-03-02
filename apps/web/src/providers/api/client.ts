@@ -14,9 +14,14 @@ export async function apiRequest<T>(
   path: string,
   options?: RequestInit,
 ): Promise<T> {
+  const hasBody = options?.body != null && options.body !== ''
+  const headers = {
+    ...(hasBody && { 'Content-Type': 'application/json' }),
+    ...options?.headers,
+  }
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
     ...options,
+    headers,
   })
 
   if (!res.ok) {
@@ -24,5 +29,8 @@ export async function apiRequest<T>(
     throw new ApiError(res.status, body)
   }
 
+  if (res.status === 204 || res.headers.get('content-length') === '0') {
+    return undefined as T
+  }
   return res.json()
 }

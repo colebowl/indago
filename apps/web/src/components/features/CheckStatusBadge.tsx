@@ -12,13 +12,22 @@ const STATUS_CONFIG: Record<CheckStatus, { label: string; variant: 'complete' | 
   skipped: { label: 'Skipped', variant: 'skipped', icon: SkipForward },
 }
 
-export function CheckStatusBadge({ status }: { status: CheckStatus }) {
+export function CheckStatusBadge({
+  status,
+  showSpinner,
+}: {
+  status: CheckStatus
+  /** When false, don't show spinner for in_progress (e.g. section has no actively running child checks). Defaults to true for in_progress. */
+  showSpinner?: boolean
+}) {
   const config = STATUS_CONFIG[status]
-  const Icon = config.icon
+  const isInProgressNoSpinner = status === 'in_progress' && (showSpinner === false)
+  const Icon = isInProgressNoSpinner ? Clock : config.icon
+  const shouldSpin = status === 'in_progress' && (showSpinner ?? true)
 
   return (
     <Badge variant={config.variant} className="gap-1">
-      <Icon className={`h-3 w-3 ${status === 'in_progress' ? 'animate-spin' : ''}`} />
+      <Icon className={`h-3 w-3 ${shouldSpin ? 'animate-spin' : ''}`} />
       {config.label}
     </Badge>
   )

@@ -1,0 +1,21 @@
+---
+description: TypeScript import path conventions
+globs: "**/*.ts"
+alwaysApply: false
+---
+
+# TypeScript Imports
+
+Use **extensionless** import paths. Do NOT add `.js` (or `.ts`) suffixes to relative imports.
+
+```typescript
+// ❌ BAD
+import { foo } from './foo.js'
+import { bar } from '../utils/bar.js'
+
+// ✅ GOOD
+import { foo } from './foo'
+import { bar } from '../utils/bar'
+```
+
+Project uses `moduleResolution: "bundler"` and tsx/tsc — extensionless paths resolve correctly.

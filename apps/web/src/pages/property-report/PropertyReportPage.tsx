@@ -1,24 +1,28 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useParams, useLocation } from 'react-router-dom'
-import { useProperty } from '@/hooks/useProperty'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { useProperty, useDeleteProperty } from '@/hooks/useProperty'
 import { useReport } from '@/hooks/useReport'
-import { useCheckSimulation } from '@/hooks/useCheckSimulation'
 import { BUYER_TYPE_CONFIGS } from '@indago/types'
-import { groupChecksByCategory } from '@/lib/categories'
+import { groupChecksByCategory, hasRetriesLeft } from '@/lib/categories'
 import { ProgressBar } from '@/components/features/ProgressBar'
 import { ForYouSummary } from '@/components/features/ForYouSummary'
 import { SummarizedView } from '@/components/features/SummarizedView'
 import { FullReportView } from '@/components/features/FullReportView'
 import { KnowYourNeighbours } from '@/components/features/KnowYourNeighbours'
 import { ChatWithReport } from '@/components/features/ChatWithReport'
-import { ChecklistLoading } from '@/components/features/ChecklistLoading'
-import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Home, DollarSign, Calendar, LayoutList, FileText, AlertCircle } from 'lucide-react'
+import { Home, DollarSign, Calendar, LayoutList, FileText, AlertCircle, Trash2, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-function generatePropertyImage(text: string): string {
+const API_BASE = import.meta.env.VITE_API_URL ?? ''
+function getPropertyImageUrl(property: { id: string; primaryImagePath?: string | null }): string | null {
+  if (!property.primaryImagePath) return null
+  return `${API_BASE}/v1/properties/${property.id}/image`
+}
+
+function generatePropertyImagePlaceholder(text: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200">
     <rect width="300" height="200" fill="#1a9a8a" rx="4"/>
     <text x="150" y="90" fill="white" font-family="system-ui" font-size="14" text-anchor="middle">${text}</text>
@@ -27,11 +31,6 @@ function generatePropertyImage(text: string): string {
     <rect x="110" y="130" width="80" height="40" fill="white" fill-opacity="0.15" rx="2"/>
   </svg>`
   return `data:image/svg+xml,${encodeURIComponent(svg)}`
-}
-
-const MOCK_PROPERTY_IMAGES: Record<string, string> = {
-  'a1b2c3d4-e5f6-7890-abcd-ef1234567890': generatePropertyImage('123 Main St'),
-  'b2c3d4e5-f6a7-8901-bcde-f12345678901': generatePropertyImage('456 Oak Ave'),
 }
 
 function formatPrice(price: number | null): string {
@@ -43,28 +42,39 @@ type ReportView = 'summarized' | 'full'
 
 export function PropertyReportPage() {
   const { id } = useParams<{ id: string }>()
-  const location = useLocation()
-  const isNewProperty = (location.state as { fromCreate?: boolean } | null)?.fromCreate === true
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const deleteProperty = useDeleteProperty()
 
   const { data: property, isLoading: propLoading, error: propError } = useProperty(id)
   const { data: report, isLoading: reportLoading, error: reportError } = useReport(id)
   const [view, setView] = useState<ReportView>('summarized')
-  const [showReport, setShowReport] = useState(!isNewProperty)
-
-  const simulation = useCheckSimulation(isNewProperty && !showReport)
-
-  useEffect(() => {
-    if (simulation.isComplete) {
-      const timer = setTimeout(() => setShowReport(true), 600)
-      return () => clearTimeout(timer)
-    }
-  }, [simulation.isComplete])
 
   const allChecks = useMemo(() => {
     if (!report?.sections) return []
     const checks = report.sections.flatMap(s => s.checks)
     return Array.from(new Map(checks.map(c => [c.checkId, c])).values())
   }, [report])
+
+  const hasPendingChecks = useMemo(
+    () =>
+      allChecks.some(
+        c =>
+          c.status === 'not_started' ||
+          c.status === 'in_progress' ||
+          (c.status === 'error' && hasRetriesLeft(c)),
+      ),
+    [allChecks],
+  )
+
+  useEffect(() => {
+    if (!hasPendingChecks || !id) return
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['report', id] })
+      queryClient.invalidateQueries({ queryKey: ['property', id] })
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [hasPendingChecks, id, queryClient])
 
   const categoryGroups = useMemo(() => {
     if (!report?.sections) return []
@@ -86,21 +96,6 @@ export function PropertyReportPage() {
   }
 
   if (propLoading || reportLoading) {
-    if (isNewProperty && !showReport) {
-      return (
-        <div className="max-w-2xl mx-auto space-y-4">
-          <PropertyHeaderSkeleton />
-          <ChecklistLoading
-            checks={simulation.checks}
-            completedCount={simulation.completedCount}
-            totalChecks={simulation.totalChecks}
-            progressPercent={simulation.progressPercent}
-            isComplete={simulation.isComplete}
-          />
-        </div>
-      )
-    }
-
     return (
       <div className="max-w-2xl mx-auto space-y-4">
         <Skeleton className="h-24 rounded-lg" />
@@ -127,46 +122,34 @@ export function PropertyReportPage() {
 
   const hasReport = report?.sections && Array.isArray(report.sections)
 
-  if (!showReport) {
-    const buyerConfig = BUYER_TYPE_CONFIGS.find(b => b.type === property.buyerType)
-    return (
-      <div className="max-w-2xl mx-auto space-y-4">
-        <PropertyHeader
-          property={property}
-          buyerConfig={buyerConfig}
-          imageUrl={MOCK_PROPERTY_IMAGES[property.id]}
-        />
-        <ChecklistLoading
-          checks={simulation.checks}
-          completedCount={simulation.completedCount}
-          totalChecks={simulation.totalChecks}
-          progressPercent={simulation.progressPercent}
-          isComplete={simulation.isComplete}
-        />
-      </div>
-    )
-  }
+  const listingIntakeCheck = allChecks.find(c => c.checkId === 'listing-intake')
+  const isListingIntakeLoading =
+    !listingIntakeCheck ||
+    listingIntakeCheck.status === 'not_started' ||
+    listingIntakeCheck.status === 'in_progress' ||
+    (listingIntakeCheck.status === 'error' && hasRetriesLeft(listingIntakeCheck))
+  // If property has a real address (not "Pending..."), listing extraction succeeded
+  // — use that as source of truth to avoid stale "Loading property" when report lags
+  const listingExtracted = property.address && property.address !== 'Pending...'
+  const showReportContent = hasReport && (!isListingIntakeLoading || listingExtracted)
 
   const buyerConfig = BUYER_TYPE_CONFIGS.find(b => b.type === property.buyerType)
-  const imageUrl = MOCK_PROPERTY_IMAGES[property.id]
+  const imageUrl = getPropertyImageUrl(property) ?? generatePropertyImagePlaceholder(property.address)
 
   return (
-    <div className={cn(
-      'max-w-2xl mx-auto space-y-4 transition-opacity duration-500',
-      showReport && isNewProperty ? 'animate-check-appear' : '',
-    )}>
+    <div className="max-w-2xl mx-auto space-y-4">
       <PropertyHeader
         property={property}
         buyerConfig={buyerConfig}
         imageUrl={imageUrl}
-        report={hasReport ? report : undefined}
+        report={showReportContent ? report : undefined}
       />
 
-      {hasReport && report.forYou && (
+      {showReportContent && report?.forYou && (
         <ForYouSummary insights={report.forYou} allChecks={allChecks} />
       )}
 
-      {hasReport ? (
+      {showReportContent ? (
         <>
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -207,17 +190,34 @@ export function PropertyReportPage() {
           )}
         </>
       ) : (
-        <Card className="p-6 text-center">
-          <CardContent className="p-0">
-            <p className="text-sm text-muted-foreground">
-              Report is being generated. Check execution is not yet implemented — checks will appear here once the check architecture is wired up.
-            </p>
-          </CardContent>
-        </Card>
+        <LoadingPropertyReport />
       )}
 
-      <ChatWithReport />
-      <KnowYourNeighbours />
+      {showReportContent && (
+        <>
+          <ChatWithReport />
+          <KnowYourNeighbours />
+        </>
+      )}
+
+      <div className="pt-4 border-t">
+        <button
+          type="button"
+          onClick={() => {
+            if (window.confirm('Delete this property? All check results and uploaded documents will be removed. This cannot be undone.')) {
+              deleteProperty.mutate(property.id, {
+                onSuccess: () => navigate('/', { replace: true }),
+                onError: () => {},
+              })
+            }
+          }}
+          disabled={deleteProperty.isPending}
+          className="text-sm text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1.5 mx-auto"
+        >
+          <Trash2 className="h-4 w-4" />
+          {deleteProperty.isPending ? 'Deleting…' : 'Delete property'}
+        </button>
+      </div>
     </div>
   )
 }
@@ -301,6 +301,20 @@ function PropertyHeaderSkeleton() {
           <Skeleton className="h-3 w-1/2 mt-2" />
         </div>
       </div>
+    </div>
+  )
+}
+
+function LoadingPropertyReport() {
+  return (
+    <div className="max-w-2xl mx-auto flex flex-col items-center justify-center py-20 text-center">
+      <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+        <Loader2 className="h-7 w-7 text-primary animate-spin" />
+      </div>
+      <h2 className="text-lg font-semibold mb-2">Loading property</h2>
+      <p className="text-sm text-muted-foreground max-w-sm">
+        Extracting listing details from the listing page. This could take a minute or two to begin seeing results.
+      </p>
     </div>
   )
 }

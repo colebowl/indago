@@ -27,7 +27,10 @@ export function ReportSection({ section }: { section: ReportSectionType }) {
                 )}
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <CheckStatusBadge status={section.status} />
+                <CheckStatusBadge
+                  status={section.status}
+                  showSpinner={section.status === 'in_progress' && section.checks.some(c => c.status === 'in_progress')}
+                />
                 <ChevronDown
                   className={cn(
                     'h-4 w-4 text-muted-foreground transition-transform',
