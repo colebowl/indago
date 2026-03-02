@@ -1,66 +1,49 @@
 import type { Property, CreatePropertyInput, ReportSummary } from '@indago/types'
-import { MOCK_PROPERTIES } from '@/mocks/properties'
-import { MOCK_REPORT } from '@/mocks/report'
+import { apiRequest } from './client'
 
-const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
-
-export async function listProperties(): Promise<Property[]> {
-  await delay(600)
-  return MOCK_PROPERTIES
+export interface PropertyWithChecks extends Property {
+  checks: unknown[]
 }
 
-export async function getProperty(id: string): Promise<Property> {
-  await delay(400)
-  const p = MOCK_PROPERTIES.find(p => p.id === id)
-  if (!p) throw new Error(`Property ${id} not found`)
-  return p
+export async function listProperties(): Promise<Property[]> {
+  return apiRequest<Property[]>('/v1/properties')
+}
+
+export async function getProperty(id: string): Promise<PropertyWithChecks> {
+  return apiRequest<PropertyWithChecks>(`/v1/properties/${id}`)
 }
 
 export async function createProperty(input: CreatePropertyInput): Promise<Property> {
-  await delay(1200)
-  return {
-    id: crypto.randomUUID(),
-    listingUrl: input.listingUrl,
-    address: 'Loading...',
-    municipality: null,
-    province: 'BC',
-    propertyType: null,
-    yearBuilt: null,
-    lotSize: null,
-    price: null,
-    pid: null,
-    waterSource: null,
-    sewerType: null,
-    isStrata: false,
-    buyerType: input.buyerType,
-    buyerGoal: input.buyerGoal ?? null,
-    isFirstTimeBuyer: input.isFirstTimeBuyer,
-    listingData: null,
-    zoningData: null,
-    ocpData: null,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }
+  return apiRequest<Property>('/v1/properties', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
 }
 
-export async function deleteProperty(_id: string): Promise<void> {
-  await delay(300)
+export async function deleteProperty(id: string): Promise<void> {
+  await apiRequest(`/v1/properties/${id}`, { method: 'DELETE' })
 }
 
-export async function runAllChecks(_id: string): Promise<void> {
-  await delay(500)
+export async function runAllChecks(id: string): Promise<void> {
+  await apiRequest(`/v1/properties/${id}/run-all-checks`, { method: 'POST' })
 }
 
 export async function getReport(id: string): Promise<ReportSummary> {
-  await delay(800)
-  if (id === MOCK_REPORT.propertyId) return MOCK_REPORT
-  return { ...MOCK_REPORT, propertyId: id }
+  return apiRequest<ReportSummary>(`/v1/properties/${id}/report`)
 }
 
 export async function uploadDocument(
-  _propertyId: string,
-  _file: File,
+  propertyId: string,
+  file: File,
 ): Promise<{ documentId: string }> {
-  await delay(2000)
-  return { documentId: crypto.randomUUID() }
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const res = await fetch(`/v1/properties/${propertyId}/upload`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (!res.ok) throw new Error('Upload failed')
+  return res.json()
 }

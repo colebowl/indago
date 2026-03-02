@@ -648,8 +648,8 @@ Captured from multi-agent review of the tech spec:
 
 - [ ] Task 13: Create Docker Compose stack
   - File: `docker-compose.yml` — postgres (with healthcheck using pg_isready), api, web, n8n services as specified in Docker Compose Services section
-  - File: `apps/api/Dockerfile` — Node 20 alpine, pnpm install, build, start
-  - File: `apps/web/Dockerfile` — Node 20 alpine, pnpm install, build, serve with preview
+  - File: `apps/api/Dockerfile` — Node 24 alpine, pnpm install, build, start
+  - File: `apps/web/Dockerfile` — Node 24 alpine, pnpm install, build, serve with preview
   - Action: `docker compose up postgres` must start and pass healthcheck
   - Notes: API `depends_on` postgres with `condition: service_healthy`. Mount `./apps/api/uploads` for PDF storage.
 

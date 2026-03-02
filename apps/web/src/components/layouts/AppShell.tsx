@@ -44,7 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 container py-6">{children}</main>
+      <main className="flex-1 container py-6 pb-24 sm:pb-6">{children}</main>
 
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur">
         <div className="flex items-center justify-around h-16">

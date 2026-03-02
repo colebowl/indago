@@ -1,5 +1,7 @@
 # Indago
 
+*Indago* (Latin): to track down, investigate, search out. From the act of encircling game during a hunt — a systematic, methodical pursuit of what is hidden.
+
 Property due diligence for Canadian home buyers.
 
 # Tools Used

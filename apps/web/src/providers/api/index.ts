@@ -7,6 +7,7 @@ export {
   getReport,
   uploadDocument,
 } from './properties.api'
+export type { PropertyWithChecks } from './properties.api'
 
 export {
   getCheckResults,

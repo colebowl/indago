@@ -9,7 +9,8 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { BuyerTypeSelector } from '@/components/features/BuyerTypeSelector'
-import { ArrowRight, ArrowLeft, Loader2, Link as LinkIcon } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Loader2, Link as LinkIcon, AlertCircle } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export function AddPropertyPage() {
   const navigate = useNavigate()
@@ -34,11 +35,22 @@ export function AddPropertyPage() {
       buyerGoal: buyerGoal || undefined,
     })
 
-    navigate(`/property/${result.id}`)
+    navigate(`/property/${result.id}`, { state: { fromCreate: true } })
   }
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-lg mx-auto space-y-4">
+      <div className="flex items-center gap-2 justify-center">
+        <div className={cn(
+          'h-2 w-8 rounded-full transition-colors',
+          step === 1 ? 'bg-primary' : 'bg-primary/30',
+        )} />
+        <div className={cn(
+          'h-2 w-8 rounded-full transition-colors',
+          step === 2 ? 'bg-primary' : 'bg-muted',
+        )} />
+      </div>
+
       {step === 1 ? (
         <Card>
           <CardHeader>
@@ -121,6 +133,13 @@ export function AddPropertyPage() {
                   rows={3}
                 />
               </div>
+
+              {createProperty.isError && (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  Something went wrong. Please try again.
+                </div>
+              )}
 
               <Button
                 onClick={handleSubmit}

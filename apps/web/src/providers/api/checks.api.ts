@@ -1,25 +1,27 @@
 import type { CheckResult } from '@indago/types'
-import { MOCK_CHECK_RESULTS } from '@/mocks/checks'
-
-const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
+import { apiRequest } from './client'
 
 export async function getCheckResults(propertyId: string): Promise<CheckResult[]> {
-  await delay(500)
-  return MOCK_CHECK_RESULTS.filter(c => c.propertyId === propertyId)
+  return apiRequest<CheckResult[]>(`/v1/properties/${propertyId}/checks`)
 }
 
 export async function executeCheck(
-  _propertyId: string,
-  _checkId: string,
+  propertyId: string,
+  checkId: string,
 ): Promise<CheckResult> {
-  await delay(1500)
-  return MOCK_CHECK_RESULTS[0]
+  return apiRequest<CheckResult>(
+    `/v1/properties/${propertyId}/checks/${checkId}/execute`,
+    { method: 'POST' },
+  )
 }
 
 export async function updateCheckStatus(
-  _propertyId: string,
-  _checkId: string,
-  _status: string,
+  propertyId: string,
+  checkId: string,
+  status: string,
 ): Promise<void> {
-  await delay(300)
+  await apiRequest(`/v1/properties/${propertyId}/checks/${checkId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  })
 }

@@ -5,11 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Plus, Search } from 'lucide-react'
 
-const COMPLETION_MAP: Record<string, number> = {
-  'a1b2c3d4-e5f6-7890-abcd-ef1234567890': 62,
-  'b2c3d4e5-f6a7-8901-bcde-f12345678901': 15,
-}
-
 export function PropertyListPage() {
   const { data: properties, isLoading, error } = useProperties()
 
@@ -71,7 +66,6 @@ export function PropertyListPage() {
           <PropertyCard
             key={property.id}
             property={property}
-            completionPercent={COMPLETION_MAP[property.id] ?? 0}
           />
         ))}
       </div>
